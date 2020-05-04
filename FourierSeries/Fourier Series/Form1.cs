@@ -14,20 +14,23 @@ namespace Fourier_Series {
 
         float speedIncrease = 2;
         int amountOfPhasorsToAdd = 0;
-        float drawGap = Convert.ToSingle(1);
+        float drawGap = 1f;
         bool takeValue = true;
-        float startIncreaser = Convert.ToSingle(0.01);
+        float startIncreaser = 0.01f;
         int circleSize = 7;
 
 
-        List<Graphs> graph = new List<Graphs>();
-        List<Phasor> phasors = new List<Phasor>();
+        Graph graph;
+        List<Phasor> phasors;
 
         /// <summary>
         /// Constructor
         /// </summary>
         public Form1() {
             InitializeComponent();
+
+            graph = new Graph();
+            phasors = new List<Phasor>();
         }
 
         /// <summary>
@@ -72,7 +75,7 @@ namespace Fourier_Series {
         void LabelUpdates() {
 
             //shows the number of points in the graph
-            count_lbl.Text = Convert.ToString(graph.Count());
+            count_lbl.Text = Convert.ToString(graph.yCoords.Count());
 
             //shows the angle of the first phasor
             angle_lbl.Text = phasors[0].ReturnAngle();
@@ -123,29 +126,29 @@ namespace Fourier_Series {
             }
 
             //checks if there are any graph points to draw to
-            if (graph.Count() != 0) {
+            if (graph.yCoords.Count() != 0) {
 
                 //draws a line from the last phasor's tip to the first pointion the graph
                 e.Graphics.DrawLine(Pens.Red,
                     phasors[phasors.Count() - 1].tip.X,
                     phasors[phasors.Count() - 1].tip.Y,
                     Width / 2,
-                    graph[graph.Count() - 1].getCoord());
+                    graph.yCoords[graph.yCoords.Count() - 1]);
             }
 
             //keeps track of the x coordinate to draw the graph point
             int graphXCoord = 0;
 
             //loops through each of the graph points backwards (excluding the 0 index)
-            for (int i = graph.Count() - 1; i > 0; i--) {
+            for (int i = graph.yCoords.Count() - 1; i > 0; i--) {
 
                 //draws a line from current point to the previous point
                 e.Graphics.DrawLine(
                     Pens.Black,
                     Width / 2 + (graphXCoord * drawGap),
-                    graph[i].getCoord(),
+                    graph.yCoords[i],
                     Width / 2 + (graphXCoord * drawGap + drawGap),
-                    graph[i - 1].getCoord());
+                    graph.yCoords[i - 1]);
 
                 //increases the x coodinate to make sure that the graph is drawn from left to right
                 graphXCoord++;
@@ -155,7 +158,7 @@ namespace Fourier_Series {
             if (Width / 2 + graphXCoord * drawGap > Width)
 
                 //removes that graph point
-                graph.RemoveAt(0);
+                graph.yCoords.RemoveAt(0);
         }
 
         /// <summary>
@@ -167,7 +170,7 @@ namespace Fourier_Series {
             if (takeValue == true) {
 
                 //adds a new point to the graph per tick at the Y coord of the last phasor
-                graph.Add(new Graphs(phasors[phasors.Count() - 1].tip.Y));
+                graph.yCoords.Add(phasors[phasors.Count() - 1].tip.Y);
 
                 takeValue = false;
             } else {
@@ -217,15 +220,15 @@ namespace Fourier_Series {
 
             //checks which side the phasor is being added on at (all the way to the right or left)
             if (phasors[0].angle > Math.PI / 2 && phasors[0].angle < Math.PI / 2 + 2 * startIncreaser) {
-                
+
                 //adds on a phasor when the right angle has been reached
                 AddPhasor((float)(Math.PI / 2));
 
                 //resets the amount to add
                 amountOfPhasorsToAdd = 0;
-            
+
             } else if (phasors[0].angle > 3 * Math.PI / 2 && phasors[0].angle < 3 * Math.PI / 2 + 2 * startIncreaser) {
-            
+
                 //adds on a phasor when the right angle has been reached
                 AddPhasor((float)(3 * Math.PI / 2));
 
