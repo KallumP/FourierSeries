@@ -1,22 +1,27 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Fourier_Series {
-    class Graphs {
-        private float y;
+    class Trace {
 
 
-        public Graphs(float _y) {
-            y = _y;
+
+        List<PointF> points;
+
+
+        public void AddPoint(Point toAdd) {
+
+
+            points.Add(toAdd);
 
         }
 
 
-        public float getCoord() {
-            return y;
-        }
+
+
     }
 }

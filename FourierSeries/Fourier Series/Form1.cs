@@ -9,235 +9,275 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Threading;
 
-namespace Fourier_Series
-{
-    public partial class Form1 : Form
-    {
+namespace Fourier_Series {
+    public partial class Form1 : Form {
+
         float speedIncrease = 2;
         int amountOfPhasorsToAdd = 0;
         float drawGap = Convert.ToSingle(1);
         bool takeValue = true;
         float startIncreaser = Convert.ToSingle(0.01);
         int circleSize = 7;
+
+
         List<Graphs> graph = new List<Graphs>();
         List<Phasor> phasors = new List<Phasor>();
 
-        public Form1()
-        {
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public Form1() {
             InitializeComponent();
         }
 
-        private void timer1_Tick(object sender, EventArgs e)
-        {
+        /// <summary>
+        /// Tick event for the timer
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void timer1_Tick(object sender, EventArgs e) {
+
+            //checks if there are new phasors to add
             checkToAddNewPhasor();
 
-            for (int i = 0; i < phasors.Count(); i++)
-            {
+            ///loops through each phasor
+            for (int i = 0; i < phasors.Count(); i++) {
+
+                //if the current loop isn't 1
                 if (i != 0)
-                    phasors[i].updateCenter(new Point(phasors[i - 1].tip.x, phasors[i - 1].tip.y));
-                //moves each phasor so that it's center is aligned to the tip of its parent
 
-                phasors[i].increaseAngle();
+                    //moves each phasor so that it's center is aligned to the tip of its parent
+                    phasors[i].UpdateCenter(new PointF(phasors[i - 1].tip.X, phasors[i - 1].tip.Y));
+
                 //increases the angle of each phasor
+                phasors[i].IncreaseAngle();
 
-                Invalidate();
                 //redraws the screen
+                Invalidate();
 
-                phasors[i].rotate();
                 //rotates each phasor
+                phasors[i].Rotate();
             }
-            //loops through all the phasors
 
-            addToGraph();
             //adds points to the graph
+            AddToGraph();
 
-            labelUpdates();
             //updates the labels
+            LabelUpdates();
         }
-        //timer
 
-        void labelUpdates()
-        {
-            count_lbl.Text = Convert.ToString(graph.Count());
+        /// <summary>
+        /// Updates all the labels
+        /// </summary>
+        void LabelUpdates() {
+
             //shows the number of points in the graph
+            count_lbl.Text = Convert.ToString(graph.Count());
 
-            angle_lbl.Text = phasors[0].returnAngle();
             //shows the angle of the first phasor
+            angle_lbl.Text = phasors[0].ReturnAngle();
 
-            phasorCount_lbl.Text = Convert.ToString(phasors.Count());
             //shows the amount of phasors being rotated
+            phasorCount_lbl.Text = Convert.ToString(phasors.Count());
 
-            phasorsToAdd_lbl.Text = Convert.ToString(amountOfPhasorsToAdd);
             //shows how many phasors need to be added on
+            phasorsToAdd_lbl.Text = Convert.ToString(amountOfPhasorsToAdd);
 
-            speedIncrease_lbl.Text = Convert.ToString(speedIncrease);
             //shows the speed increase
+            speedIncrease_lbl.Text = Convert.ToString(speedIncrease);
 
-            graphStretch_lbl.Text = Convert.ToString(drawGap);
             //shows the stretch of the graph
+            graphStretch_lbl.Text = Convert.ToString(drawGap);
         }
-        //used to update all of the labels
 
-        private void Form1_Load(object sender, EventArgs e)
-        {
-            phasors.Add(new Phasor(
-                Convert.ToSingle(Height / circleSize * (4 / (1 * Math.PI))),
-                new Point(Width / 4,
-                Height / 2),
-                startIncreaser,
-                Convert.ToSingle(Math.PI / 2)));
+        /// <summary>
+        /// Form load event
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Form1_Load(object sender, EventArgs e) {
+
             //adds the first phasor
+            phasors.Add(new Phasor(
+                (float)(Height / circleSize * (4 / (1 * Math.PI))),
+                new PointF(Width / 4, Height / 2),
+                startIncreaser,
+                (float)Math.PI / 2));
         }
-        //initial load condition
 
-        private void Form1_Paint(object sender, PaintEventArgs e)
-        {
-            int graphAligner = 0;
+        /// <summary>
+        /// Form paint event
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Form1_Paint(object sender, PaintEventArgs e) {
 
-            foreach (Phasor p in phasors)
-            {
-                e.Graphics.DrawEllipse(Pens.Gray, p.center.x - p.radius, p.center.y - p.radius, p.diameter, p.diameter);
-                //draws out each circle
+            //loops through each phasor
+            foreach (Phasor p in phasors) {
 
-                e.Graphics.DrawLine(Pens.Blue, p.center.x, p.center.y, p.tip.x, p.tip.y);
+                //draws out each circle (traced by the tip of the phasor)
+                e.Graphics.DrawEllipse(Pens.Gray, p.center.X - p.radius, p.center.Y - p.radius, p.diameter, p.diameter);
+
                 //draws each phasor
+                e.Graphics.DrawLine(Pens.Blue, p.center.X, p.center.Y, p.tip.X, p.tip.Y);
             }
 
-            if (graph.Count() != 0)
-            {
+            //checks if there are any graph points to draw to
+            if (graph.Count() != 0) {
+
+                //draws a line from the last phasor's tip to the first pointion the graph
                 e.Graphics.DrawLine(Pens.Red,
-                    phasors[phasors.Count() - 1].tip.x,
-                    phasors[phasors.Count() - 1].tip.y,
+                    phasors[phasors.Count() - 1].tip.X,
+                    phasors[phasors.Count() - 1].tip.Y,
                     Width / 2,
                     graph[graph.Count() - 1].getCoord());
             }
-            //draws a line from the last phasor's tip to the first pointin the graph
 
-            for (int i = (graph.Count() - 1); i > 0; i--)
-            {
+            //keeps track of the x coordinate to draw the graph point
+            int graphXCoord = 0;
+
+            //loops through each of the graph points backwards (excluding the 0 index)
+            for (int i = graph.Count() - 1; i > 0; i--) {
+
+                //draws a line from current point to the previous point
                 e.Graphics.DrawLine(
                     Pens.Black,
-                    Width / 2 + (graphAligner * drawGap),
+                    Width / 2 + (graphXCoord * drawGap),
                     graph[i].getCoord(),
-                    Width / 2 + (graphAligner * drawGap + drawGap),
+                    Width / 2 + (graphXCoord * drawGap + drawGap),
                     graph[i - 1].getCoord());
-                //draws the lines between each point
 
-                graphAligner++;
-                //increases the aligner to make sure that the graph is drawn from left to right
+                //increases the x coodinate to make sure that the graph is drawn from left to right
+                graphXCoord++;
             }
-            ////draws the graph backwards
 
-            if (Width / 2 + graphAligner * drawGap > Width)
+            //Checks if the final graph point is outside the buonds of the window
+            if (Width / 2 + graphXCoord * drawGap > Width)
+
+                //removes that graph point
                 graph.RemoveAt(0);
-            //removes the end of the graph
-
         }
-        //paints the screen
 
-        public void addToGraph()
-        {
-            if (takeValue == true)
-            {
-                graph.Add(new Graphs(phasors[phasors.Count() - 1].tip.y));
-                //adds a new point to the graph per tick at the y coord of the last phasor
+        /// <summary>
+        /// Adds a new value to the graph
+        /// </summary>
+        public void AddToGraph() {
+
+            //checks if the value should be taken (so that only every other value is taken)
+            if (takeValue == true) {
+
+                //adds a new point to the graph per tick at the Y coord of the last phasor
+                graph.Add(new Graphs(phasors[phasors.Count() - 1].tip.Y));
 
                 takeValue = false;
-            }
-            else
-            {
+            } else {
+
                 takeValue = true;
             }
-            //takes every other value
         }
-        //adds values to the graph
 
-        private void addPhasor_btn_Click(object sender, EventArgs e)
-        {
+        /// <summary>
+        /// Add phasor click event
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void addPhasor_btn_Click(object sender, EventArgs e) {
+
+            //increments how many phasors should be added at the end of the revolution
             amountOfPhasorsToAdd++;
         }
-        //notes how many phasors to add on at the end of the revolution
 
-        public void addPhasor(float _newAngle)
-        {
+        /// <summary>
+        /// Adds on a new phasor
+        /// </summary>
+        /// <param name="_newAngle">The angle at which to add the phasor</param>
+        public void AddPhasor(float _newAngle) {
+
             for (int i = 0; i < amountOfPhasorsToAdd; i++)
-            {
-                phasors.Add(new Phasor(
-                    Convert.ToSingle(Height / circleSize * (4 / ((1 + phasors.Count * 2) * Math.PI))),
-                    //gets the new radius based off the last one's radius
-                    new Point(phasors[phasors.Count() - 1].center.x,
-                    phasors[phasors.Count() - 1].center.y - phasors[phasors.Count() - 1].radius),
-                    //gets the center of the new phasor from the tip of the last phasor
-                    phasors[0].increaser * (phasors.Count() * speedIncrease + 1),
-                    //gets the new phasors rotation speed from the first phasor's speed
-                    _newAngle));
+
                 //adds a new phasor to the end of the smallest phasor
+                phasors.Add(new Phasor(
 
+                    //gets the new radius based off the last one's radius
+                    (float)(Height / circleSize * (4 / ((1 + phasors.Count * 2) * Math.PI))),
 
+                    //gets the center of the new phasor from the tip of the last phasor
+                    new PointF(phasors[phasors.Count() - 1].center.X, phasors[phasors.Count() - 1].center.Y - phasors[phasors.Count() - 1].radius),
+
+                    //gets the new phasors rotation speed from the first phasor's speed
+                    phasors[0].angleIncrement * (phasors.Count() * speedIncrease + 1),
+
+                    _newAngle));
+        }
+
+        /// <summary>
+        /// Checks to see if the new phasor should be added on
+        /// </summary>
+        public void checkToAddNewPhasor() {
+
+            //checks which side the phasor is being added on at (all the way to the right or left)
+            if (phasors[0].angle > Math.PI / 2 && phasors[0].angle < Math.PI / 2 + 2 * startIncreaser) {
+                
+                //adds on a phasor when the right angle has been reached
+                AddPhasor((float)(Math.PI / 2));
+
+                //resets the amount to add
+                amountOfPhasorsToAdd = 0;
+            
+            } else if (phasors[0].angle > 3 * Math.PI / 2 && phasors[0].angle < 3 * Math.PI / 2 + 2 * startIncreaser) {
+            
+                //adds on a phasor when the right angle has been reached
+                AddPhasor((float)(3 * Math.PI / 2));
+
+                //resets the amount to add
+                amountOfPhasorsToAdd = 0;
             }
         }
-        //adds on a new phasor
 
-        public void checkToAddNewPhasor()
-        {
-            if (phasors[0].angle > Math.PI / 2 && phasors[0].angle < Math.PI / 2 + 2 * startIncreaser)
-            {
-                addPhasor(Convert.ToSingle(Math.PI / 2));
-                //adds on a phasor when the right angle has been reached
-
-                amountOfPhasorsToAdd = 0;
-                //resets the amount to add
-            }
-            else if (phasors[0].angle > 3 * Math.PI / 2 && phasors[0].angle < 3 * Math.PI / 2 + 2 * startIncreaser)
-            {
-                addPhasor(Convert.ToSingle(3 * Math.PI / 2));
-                //adds on a phasor when the right angle has been reached
-
-                amountOfPhasorsToAdd = 0;
-                //resets the amount to add
-            }
-            //if statements to check to make sure it is adding on at the right time
-            //this is so that the right angle can be given to the new phasor being added
-        }
-        //checks to see if the new phasors should be added on
-
-        private void removePhasor_btn_Click(object sender, EventArgs e)
-        {
+        /// <summary>
+        /// Removes the last phasor from the list
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void removePhasor_btn_Click(object sender, EventArgs e) {
             if (phasors.Count > 1)
                 phasors.RemoveAt(phasors.Count - 1);
         }
-        //removes the smallest phasor
 
-        private void increaseSpeed_btn_Click(object sender, EventArgs e)
-        {
+        /// <summary>
+        /// Increases the rotation of the next phasor
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void increaseSpeed_btn_Click(object sender, EventArgs e) {
             speedIncrease += Convert.ToSingle(1);
         }
-        private void decreaseSpeed_btn_Click(object sender, EventArgs e)
-        {
+
+        /// <summary>
+        /// Decreases the rotation of the next phasor
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void decreaseSpeed_btn_Click(object sender, EventArgs e) {
             speedIncrease -= Convert.ToSingle(1);
         }
-        //changes the rotation speed of the new phasors
 
-        private void button1_Click(object sender, EventArgs e)
-        {
+        /// <summary>
+        /// Increases the gap between the graph points
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void button1_Click(object sender, EventArgs e) {
             drawGap += Convert.ToSingle(0.5);
         }
-        private void button2_Click(object sender, EventArgs e)
-        {
+
+        /// <summary>
+        /// Decreases the stretch of the graph
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void button2_Click(object sender, EventArgs e) {
             drawGap -= Convert.ToSingle(0.5);
         }
-        //changes the stretch of the graph
     }
-    public class Point
-    {
-        public float x;
-        public float y;
-
-        public Point(float _x, float _y)
-        {
-            x = _x;
-            y = _y;
-        }
-    }
-    //point variable class 
 }

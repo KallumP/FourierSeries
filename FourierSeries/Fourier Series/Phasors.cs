@@ -1,64 +1,80 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Fourier_Series
-{
-    class Phasor
-    {
-        public float increaser;
+namespace Fourier_Series {
+    class Phasor {
+
+        public float angleIncrement;
         public float angle;
         public float radius;
         public float diameter;
-        public Point center;
-        public Point tip = new Point(0, 0);
-        public float angleAdded = 0;
+        public PointF center;
+        public PointF tip = new PointF(0, 0);
 
-        public Phasor(float _radius, Point _center, float _increaser, float _angle)
-        {
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="_radius">Phasor radius</param>
+        /// <param name="_center">The center point of the phasor</param>
+        /// <param name="_angleIncrement">The angle at which to incremenat the phasor's angle</param>
+        /// <param name="_angle">The starting angle of the phasor</param>
+        public Phasor(float _radius, PointF _center, float _angleIncrement, float _angle) {
+
             angle = _angle;
             radius = _radius;
             diameter = radius * 2;
             center = _center;
-            increaser = _increaser;
-            tip.x = Convert.ToSingle(Math.Cos(Math.PI / 2 - angle)) * radius + center.x;
-            tip.y = Convert.ToSingle(Math.Sin(Math.PI / 2 - angle)) * radius + center.y;
+            angleIncrement = _angleIncrement;
+            tip.X = Convert.ToSingle(Math.Cos(Math.PI / 2 - angle)) * radius + center.X;
+            tip.Y = Convert.ToSingle(Math.Sin(Math.PI / 2 - angle)) * radius + center.Y;
         }
-        //constructor
 
-        public void increaseAngle()
-        {
-            angle += increaser;
-            angleAdded += increaser;
+        /// <summary>
+        /// Incremenats the angle of the phasor
+        /// </summary>
+        public void IncreaseAngle() {
 
+            //increments the angle by the assigned increment value
+            angle += angleIncrement;
+
+            //checks if the angle has gone past a full revolution (2Pi)
             if (angle > Math.PI / 2 + 2 * Math.PI)
+
+                //removes a full revolution from the angle, setting it back to 0
                 angle -= Convert.ToSingle(2 * Math.PI);
-            //sets the angle back to Pi/2 after each revolution
-            //no change in graph or rotation, because it is just removing a whole revolution from the angle
-            //just used for angle checking
-        }
-        //increases the angle of the phasor
 
-        public void rotate()
-        {
-            tip.x = Convert.ToSingle(Math.Cos(Math.PI / 2 - angle)) * radius + center.x;
-            tip.y = Convert.ToSingle(Math.Sin(Math.PI / 2 - angle)) * radius + center.y;
-            //sets the new value of the tip of the phasor
         }
-        //rotates the phasor
 
-        public void updateCenter(Point newCenter)
-        {
+        /// <summary>
+        /// Rotates the tip coordinate of the phasor around the center point
+        /// </summary>
+        public void Rotate() {
+
+            //sets the new value for the tip of the phasor
+            tip.X = Convert.ToSingle(Math.Cos(Math.PI / 2 - angle)) * radius + center.X;
+            tip.Y = Convert.ToSingle(Math.Sin(Math.PI / 2 - angle)) * radius + center.Y;
+        }
+
+        /// <summary>
+        /// Sets the center point of the phasor
+        /// </summary>
+        /// <param name="newCenter"></param>
+        public void UpdateCenter(PointF newCenter) {
+
             center = newCenter;
         }
-        //sets the center for phasors that are connected to larger phasors
 
-        public string returnAngle()
-        {
+        /// <summary>
+        /// Returns the phasor's angle
+        /// </summary>
+        /// <returns>The phasor's angle in string form</returns>
+        public string ReturnAngle() {
+
             return Convert.ToString(angle);
         }
-        //returns the angle of a phasor
     }
 }
